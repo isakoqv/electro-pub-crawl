@@ -4,9 +4,11 @@ var game = new Phaser.Game(2500, 800, Phaser.AUTO, '',
 function preload()
 {
 	game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+        game.load.image('portrait', 'assets/portrait.jpg');
 }
 
 var player;                     // Player object
+var isak;
 var speed = 350;                // Speed of the player
 
 var numberOfStudents = 10;      // Total number of students, including player
@@ -44,6 +46,8 @@ function create()
     game.input.keyboard.addKeyCapture([ Phaser.Keyboard.LEFT, 
         Phaser.Keyboard.RIGHT, Phaser.Keyboard.SPACEBAR ]);
     
+    
+          
     //*** INITIALIZE PLAYER ***
     player = new Student(game.add.sprite(game.world.width/2,game.world.height/2,
     'dude'));
@@ -67,29 +71,43 @@ function create()
     
     //*** INITIALIZE REST OF STUDENTS ***
     for (var i=1; i < numberOfStudents; i++) {
+                
         studentArray[i] = new Student(game.add.sprite(player.sprite.x, 
     trainPath[i*spacePoints].y, 'dude'));
-        // Add random tint to sprite to help identify separate students
-        studentArray[i].sprite.tint = Math.random() * 0xffffff;
-        
-        studentArray[i].sprite.scale.setTo(0.8,0.8);
-        studentArray[i].sprite.anchor.setTo(0.5,0.5);
     
-        studentArray[i].sprite.animations.add('left', [0, 1, 2, 3], 10, true);
-        studentArray[i].sprite.animations.add('right', [5, 6, 7, 8], 10, true);
-        studentArray[i].addToTrain();       
+        var thisStudent = studentArray[i];
+        // Add random tint to sprite to help identify separate students
+        thisStudent.sprite.tint = Math.random() * 0xffffff;
+        
+        thisStudent.sprite.scale.setTo(0.8,0.8);
+        thisStudent.sprite.anchor.setTo(0.5,0.5);
+    
+        thisStudent.sprite.animations.add('left', [0, 1, 2, 3], 10, true);
+        thisStudent.sprite.animations.add('right', [5, 6, 7, 8], 10, true);
+        thisStudent.addToTrain();       
     }
     
 }
 
+    var spacer = 0;
 
 function update()
 {
     player.sprite.body.velocity.setTo(0,0);
     
-    if (spaceKey.downDuration(10) && train.length > 1) {
+    if (spaceKey.downDuration(1) && train.length > 1) {
         train[train.length-1].removeFromTrain();
+        isak = game.add.sprite(200+spacer, 400, 'portrait');
+        isak.scale.setTo(0.3, 0.3);
+        game.physics.arcade.enable(isak);
+    
+        isak.body.immovable = true;
+        
+        spacer += 150;
     }
+    
+    var hitIsak = game.physics.arcade.collide(player.sprite, isak);
+    
     
     if (cursors.up.isDown) {
         player.sprite.body.velocity.y = -speed;
@@ -101,7 +119,7 @@ function update()
     }
     else if (cursors.left.isDown) {
         player.sprite.body.velocity.x = -speed;
-        player.sprite.animations.play('left')
+        player.sprite.animations.play('left');
         updateTrain();
     }
     else if (cursors.right.isDown) {
@@ -114,13 +132,13 @@ function update()
     }
     
     for (var i=1; i < numberOfStudents; i++) {
-        
-        if (studentArray[i].isInTrain === false) {
-            var xDist = Math.abs(player.sprite.x - studentArray[i].sprite.x);
-            var yDist = Math.abs(player.sprite.y - studentArray[i].sprite.y);
+    var thisStudent = studentArray[i];
+        if (!(thisStudent.isInTrain)) {
+            var xDist = Math.abs(player.sprite.x - thisStudent.sprite.x);
+            var yDist = Math.abs(player.sprite.y - thisStudent.sprite.y);
             
             if (Math.sqrt(xDist*xDist + yDist*yDist) < 20) {
-                studentArray[i].addToTrain();
+                thisStudent.addToTrain();
             }
         }
     }
@@ -128,10 +146,15 @@ function update()
 
 function updateTrain() {
     
+    // Do not update train if collision is detected
+    if (!(player.sprite.body.wasTouching.none)) {
+            return;
+    }
+    
     // Everytime the player moves,
     // knock the last train Point off the end
     // and insert the new location at the start of the array
-    
+        
     var point = trainPath.pop(); // Remove point at the end
     
     point.setTo(player.sprite.x, player.sprite.y); // Move point to start
