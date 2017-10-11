@@ -20,22 +20,14 @@ var spacePoints = 5;            // Number of Points between students
 
 var spaceKey;                   // Spacebar reference
 
-// The student constructor
-function Student(sprite) {
+//*** NATION CONSTRUCTOR ***
+function Nation(sprite) {
     
-    this.sprite = sprite;       // The student sprite
-    this.isInTrain = false;     
+    this.sprite = sprite;
+    this.isOpen = true;
     
-    // Adds the student to the train array
-    this.addToTrain = function() {
-        train.push(this);
-        this.isInTrain = true;
-    } 
-    // Removes the student from the train array
-    this.removeFromTrain = function() {
-        const index = train.indexOf(this);
-        train.splice(index, 1);
-        this.isInTrain = false;
+    this.close = function() {
+        this.isOpen = false;
     }
 }
 
@@ -76,7 +68,9 @@ function create()
     for (var i=1; i < numberOfStudents; i++) {
         studentArray[i] = new Student(game.add.sprite(player.sprite.x, 
     trainPath[i*spacePoints].y, 'dude'));
+        // Add random tint to sprite to help identify separate students
         studentArray[i].sprite.tint = Math.random() * 0xffffff;
+        
         studentArray[i].sprite.scale.setTo(0.8,0.8);
         studentArray[i].sprite.anchor.setTo(0.5,0.5);
     
