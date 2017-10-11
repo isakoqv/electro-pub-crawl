@@ -1,4 +1,5 @@
-var game = new Phaser.Game(2500, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(2500, 800, Phaser.AUTO, '', 
+{ preload: preload, create: create, update: update });
 
 function preload()
 {
@@ -81,17 +82,14 @@ function create()
     
 }
 
-var wait = 0;
 
 function update()
 {
     player.sprite.body.velocity.setTo(0,0);
     
-    if (spaceKey.isDown && wait < 0 && train.length > 1) {
+    if (spaceKey.downDuration(10) && train.length > 1) {
         train[train.length-1].removeFromTrain();
-        wait = 20;
     }
-    wait--;
     
     if (cursors.up.isDown) {
         player.sprite.body.velocity.y = -speed;
